@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | Maheshwari Sweets Ulatu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- PDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Firebase Libraries -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+
+    <style>
+        .checkout-container { max-width: 600px; margin: 20px auto; padding: 20px; padding-bottom: 100px; }
+        .checkout-card { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid rgba(212, 175, 55, 0.1); }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.9rem; color: #800000; }
+        .form-control { width: 100%; padding: 14px; border: 1.5px solid #f0f0f0; border-radius: 12px; font-family: inherit; font-size: 1rem; background: #fafafa; box-sizing: border-box; }
+        .order-summary-box { background: #fff; padding: 20px; border-radius: 20px; margin-bottom: 25px; border-left: 5px solid #d4af37; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .summary-item { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .summary-total { border-top: 1px dashed #ccc; margin-top: 10px; padding-top: 10px; font-weight: 800; font-size: 1.1rem; color: #800000; display: flex; justify-content: space-between; }
+        .place-order-btn { width: 100%; background: #25D366; color: white; border: none; padding: 16px; border-radius: 15px; font-size: 1.1rem; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .min-order-msg { display: none; background: #fff3f3; border: 1.5px solid #f5c6c6; color: #800000; padding: 12px 16px; border-radius: 12px; font-size: 0.88rem; font-weight: 600; margin-top: 14px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="header" style="display: flex; justify-content: space-between; padding: 15px; align-items: center; background: white;">
+        <a href="index.html" style="text-decoration: none; color: #800000; font-weight: 700;">← Shop More</a>
+        <div class="logo-text" style="font-weight: 800; color: #800000;">FINAL <span style="color: #d4af37;">CHECKOUT</span></div>
+        <div></div>
+    </div>
+
+    <div class="checkout-container">
+        <div class="order-summary-box">
+            <h2 style="margin-bottom: 15px; font-size: 1.1rem; color: #800000;">Aapka Order List</h2>
+            <div id="orderReview"></div>
+            <div class="min-order-msg" id="minOrderMsg">⚠️ Minimum order ₹100 ka hona chahiye. Aur items add karein!</div>
+        </div>
+
+        <div class="checkout-card">
+            <h2 style="margin-bottom: 20px; font-size: 1.2rem;">Delivery Information</h2>
+            <form id="finalOrderForm">
+                <div class="form-group"><label>Aapka Naam</label><input type="text" id="custName" class="form-control" required></div>
+                <div class="form-group"><label>WhatsApp Number</label><input type="tel" id="custPhone" class="form-control" required></div>
+                <div class="form-group"><label>Pura Pata</label><textarea id="custAddress" class="form-control" rows="3" required></textarea></div>
+                <div class="form-group"><label>Landmark</label><input type="text" id="custLandmark" class="form-control"></div>
+                <button type="submit" class="place-order-btn">Confirm & Get Bill</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 1. Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB3WDiHmiACMSvrpAP71kH5rOCLJOjZrRk",
+            authDomain: "maheshwari-sweets.firebaseapp.com",
+            databaseURL: "https://maheshwari-sweets-default-rtdb.firebaseio.com",
+            projectId: "maheshwari-sweets",
+            storageBucket: "maheshwari-sweets.firebasestorage.app",
+            messagingSenderId: "658774438028",
+            appId: "1:658774438028:web:4b43a81ac573df5b0fcba9"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // 2. Render Order
+        function renderOrder() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const container = document.getElementById('orderReview');
+            if (cart.length === 0) { window.location.href = "index.html"; return; }
+            let html = '', total = 0;
+            cart.forEach(item => {
+                const qty = item.quantity || item.qty || 0;
+                html += `<div class="summary-item"><span>${item.name} (x${qty})</span><span>₹${item.price * qty}</span></div>`;
+                total += (item.price * qty);
+            });
+            html += `<div class="summary-total"><span>Total Amount</span><span>₹${total}</span></div>`;
+            container.innerHTML = html;
+        }
+
+        // 3. Generate PDF Invoice
+        function downloadInvoice(name, phone, address, cart, total, landmark) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const pageW = doc.internal.pageSize.getWidth();
+            const margin = 18;
+
+            doc.setFillColor(128, 0, 0);
+            doc.rect(0, 0, pageW, 38, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(22);
+            doc.setFont('helvetica', 'bold');
+            doc.text('MAHESHWARI SWEETS', pageW / 2, 16, { align: 'center' });
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Ranchi, Jharkhand', pageW / 2, 24, { align: 'center' });
+            doc.text('Ph: 7047833473', pageW / 2, 30, { align: 'center' });
+
+            doc.setDrawColor(212, 175, 55);
+            doc.setLineWidth(1);
+            doc.line(margin, 42, pageW - margin, 42);
+
+            doc.setTextColor(128, 0, 0);
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.text('BILL TO', margin, 52);
+            doc.setTextColor(50, 50, 50);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(11);
+            doc.text(name, margin, 61);
+            doc.setFontSize(10);
+            doc.text('Ph: ' + phone, margin, 69);
+            const addressLines = doc.splitTextToSize('Address: ' + address + (landmark ? ' | Landmark: ' + landmark : ''), pageW - margin * 2);
+            doc.text(addressLines, margin, 77);
+            const afterAddress = 77 + (addressLines.length * 6);
+
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+            const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+            doc.setTextColor(130, 130, 130);
+            doc.setFontSize(9);
+            doc.text('Date: ' + dateStr + '  |  Time: ' + timeStr, pageW - margin, afterAddress + 2, { align: 'right' });
+
+            doc.setDrawColor(212, 175, 55);
+            doc.setLineWidth(0.5);
+            doc.line(margin, afterAddress + 8, pageW - margin, afterAddress + 8);
+
+            let y = afterAddress + 16;
+            doc.setFillColor(253, 248, 242);
+            doc.rect(margin, y - 6, pageW - margin * 2, 10, 'F');
+            doc.setTextColor(128, 0, 0);
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'bold');
+            doc.text('ITEM', margin + 2, y);
+            doc.text('QTY', pageW / 2 - 10, y, { align: 'center' });
+            doc.text('AMOUNT', pageW - margin - 2, y, { align: 'right' });
+            y += 6;
+            doc.setDrawColor(220, 210, 195);
+            doc.setLineWidth(0.3);
+            doc.line(margin, y, pageW - margin, y);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            cart.forEach((item, idx) => {
+                y += 9;
+                const qty = item.quantity || item.qty || 1;
+                const subtotal = item.price * qty;
+                doc.setFillColor(idx % 2 === 0 ? 255 : 253, idx % 2 === 0 ? 255 : 251, idx % 2 === 0 ? 255 : 247);
+                doc.rect(margin, y - 6, pageW - margin * 2, 9, 'F');
+                doc.setTextColor(60, 60, 60);
+                doc.text(item.name, margin + 2, y);
+                doc.setTextColor(128, 0, 0);
+                doc.text(String(qty), pageW / 2 - 10, y, { align: 'center' });
+                doc.setTextColor(60, 60, 60);
+                doc.text('Rs.' + subtotal, pageW - margin - 2, y, { align: 'right' });
+            });
+
+            y += 4;
+            doc.setFillColor(128, 0, 0);
+            doc.rect(margin, y, pageW - margin * 2, 14, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(12);
+            doc.text('GRAND TOTAL', margin + 4, y + 9);
+            doc.text('Rs.' + total, pageW - margin - 4, y + 9, { align: 'right' });
+
+            y += 24;
+            doc.setDrawColor(212, 175, 55);
+            doc.setLineWidth(0.5);
+            doc.line(margin, y, pageW - margin, y);
+            y += 8;
+            doc.setTextColor(128, 0, 0);
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Shukriya! order again.', pageW / 2, y, { align: 'center' });
+            doc.setTextColor(160, 160, 160);
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Maheshwari Sweets, Ranchi', pageW / 2, y + 7, { align: 'center' });
+
+            doc.save('Bill_' + name + '.pdf');
+        }
+
+        // 4. Submit Order (Firebase + PDF + Redirect)
+        document.getElementById('finalOrderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const name = document.getElementById('custName').value;
+            const phone = document.getElementById('custPhone').value;
+            const address = document.getElementById('custAddress').value;
+            const landmark = document.getElementById('custLandmark').value;
+            let total = cart.reduce((s, i) => s + (i.price * (i.quantity || i.qty)), 0);
+
+            // Minimum Order Filter
+            if (total < 100) {
+                const msg = document.getElementById('minOrderMsg');
+                msg.style.display = 'block';
+                msg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+
+            const orderData = {
+                customerName: name,
+                customerPhone: phone,
+                address: address,
+                landmark: landmark,
+                items: cart,
+                totalAmount: total,
+                status: "Pending",
+                timestamp: Date.now()
+            };
+
+            // Send to Firebase
+            database.ref('orders').push(orderData).then((ref) => {
+                // Download Bill
+                downloadInvoice(name, phone, address, cart, total, landmark);
+
+                // Order key & time save karo my-order ke liye
+                localStorage.setItem('last_order_key', ref.key);
+                localStorage.setItem('last_order_time', Date.now());
+
+                localStorage.removeItem('cart');
+                window.location.href = "my-order.html";
+            });
+        });
+
+        // 5. DOMContentLoaded - bahar hai, sahi jagah
+        document.addEventListener('DOMContentLoaded', renderOrder);
+    </script>
+</body>
+</html>

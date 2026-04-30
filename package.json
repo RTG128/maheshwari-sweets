@@ -1,0 +1,17 @@
+{
+  "name": "meheshwari-sweets",
+  "version": "1.0.0",
+  "description": "Maheshwari Sweets ek professional digital ordering system hai jo **Ulatu** ke liye khas banaya gaya hai. Yeh system customer se order leta hai, use local backend (JSON) mein save karta hai, aur professional format mein WhatsApp par bhejta hai.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}

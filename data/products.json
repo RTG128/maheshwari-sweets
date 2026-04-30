@@ -1,0 +1,74 @@
+[
+  {
+    "id": "ms-101",
+    "name": "Chhola Bhatura (2 Pc)",
+    "price": 80,
+    "category": "Breakfast",
+    "image": "assets/images/chhola-bhatura.jpg",
+    "description": "Hot and fluffy bhaturas served with spicy chole."
+  },
+  {
+    "id": "ms-102",
+    "name": "Samosa (Per Pc)",
+    "price": 10,
+    "category": "Snacks",
+    "image": "assets/images/samosa.jpg",
+    "description": "Crispy pyramid pastry filled with spiced potatoes."
+  },
+  {
+    "id": "ms-103",
+    "name": "Jalebi (Per Plate)",
+    "price": 25,
+    "category": "Breakfast",
+    "image": "assets/images/jalebi.jpg",
+    "description": "Traditional sweet, crispy and juicy."
+  },
+  {
+    "id": "ms-201",
+    "name": "Veg Chowmein (Half)",
+    "price": 40,
+    "category": "Chinese",
+    "image": "assets/images/chowmein-half.jpg",
+    "description": "Classic stir-fried noodles with fresh veggies."
+  },
+  {
+    "id": "ms-202",
+    "name": "Chicken Chilli (Full)",
+    "price": 160,
+    "category": "Chinese",
+    "image": "assets/images/chicken-chilli.jpg",
+    "description": "Spicy and tangy chicken chunks with bell peppers."
+  },
+  {
+    "id": "ms-301",
+    "name": "Gulab Jamun",
+    "price": 15,
+    "category": "Sweets",
+    "image": "assets/images/gulab-jamun.jpg",
+    "description": "Soft khoya balls dipped in sugar syrup."
+  },
+  {
+    "id": "ms-302",
+    "name": "Rasgulla",
+    "price": 12,
+    "category": "Sweets",
+    "image": "assets/images/rasgulla.jpg",
+    "description": "Spongy and sweet cottage cheese balls."
+  },
+  {
+    "id": "ms-401",
+    "name": "Paneer Cheese Roll",
+    "price": 90,
+    "category": "Rolls",
+    "image": "assets/images/paneer-roll.jpg",
+    "description": "Loaded with paneer, cheese, and special sauces."
+  },
+  {
+    "id": "ms-501",
+    "name": "Veg Special Thali",
+    "price": 140,
+    "category": "Thali",
+    "image": "assets/images/veg-thali.jpg",
+    "description": "Complete meal with 2 Roti, Rice, Dal, Paneer, and Mix Veg."
+  }
+]

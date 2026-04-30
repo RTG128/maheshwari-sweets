@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Maheshwari Sweets Ulatu | Best Sweet Shop near JRU & YBN University Namkum</title>
+    <meta name="description" content="Maheshwari Sweets Raja Ulatu (Namkum) offers authentic Indian sweets, breakfast, and veg-thali. Top-rated restaurant near Jharkhand Rai University (JRU) and YBN University. Shuddh aur Swadisht taste.">
+    <meta name="keywords" content="Maheshwari Sweets Ulatu, Best sweet shop in Namkum Ranchi, Restaurant near Jharkhand Rai University, Food near YBN University, Raja Ulatu sweets, Tiffin service Namkum, Ranchi sweets online">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+    /* ── NEW PREMIUM UPGRADES ── */
+    :root {
+        --primary: #800000;
+        --accent: #d4af37;
+        --bg-soft: #fdf8f0;
+        --ease: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    body { background: var(--bg-soft); scroll-behavior: smooth; font-family: 'DM Sans', sans-serif; margin: 0; }
+
+    /* Smart Header Upgrade */
+    .header {
+        transition: all 0.4s var(--ease);
+        padding: 15px 6%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: white;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+    .header.scrolled {
+        padding: 8px 6%;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    }
+
+    .logo-text { font-weight: 800; color: var(--primary); }
+    .logo-text span { color: var(--accent); }
+
+    /* Hero Section */
+    .hero {
+        background: #4a1c1c;
+        color: white;
+        text-align: center;
+        padding: 60px 20px;
+        margin: 15px;
+        border-radius: 25px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-title {
+        font-size: clamp(1.8rem, 8vw, 3rem) !important;
+        margin: 0;
+        z-index: 5;
+        position: relative;
+    }
+
+    /* Product Grid */
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 15px;
+        padding: 20px 6% 120px;
+    }
+
+    .product-card {
+        background: #fff;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: transform 0.4s var(--ease);
+        display: flex;
+        flex-direction: column;
+    }
+    .product-card:hover { transform: translateY(-5px); }
+
+    .img-box {
+        width: 100%;
+        height: 140px;
+        background: #f0f0f0;
+    }
+    .img-box img { width: 100%; height: 100%; object-fit: cover; }
+
+    .product-info { padding: 12px; flex-grow: 1; display: flex; flex-direction: column; }
+    .cat-label { font-size: 0.65rem; color: var(--primary); font-weight: 700; text-transform: uppercase; }
+    .p-name { font-size: 0.95rem; margin: 5px 0; font-weight: 600; color: #333; line-height: 1.2; }
+
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto;
+        padding-top: 10px;
+    }
+    .p-price { font-weight: 800; color: var(--primary); font-size: 1.1rem; }
+    .add-btn {
+        background: var(--primary);
+        color: white;
+        border: none;
+        width: 35px;
+        height: 35px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    /* Category Tabs */
+    .category-wrapper { overflow-x: auto; white-space: nowrap; padding: 10px 6%; scrollbar-width: none; }
+    .filter-btn {
+        padding: 8px 18px;
+        border-radius: 20px;
+        border: none;
+        background: white;
+        margin-right: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .filter-btn.active { background: var(--primary); color: white; }
+
+    /* Floating Cart */
+    .cart-bar {
+        position: fixed;
+        bottom: 25px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 450px;
+        background: var(--primary);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 50px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-decoration: none;
+        box-shadow: 0 10px 30px rgba(128,0,0,0.3);
+        z-index: 2000;
+        transition: 0.3s;
+    }
+
+    #scrollProgress {
+        position: fixed;
+        top: 0; left: 0; height: 3px;
+        background: var(--accent); z-index: 9999; width: 0%;
+    }
+
+    #minOrderToast {
+        position: fixed;
+        bottom: 100px; left: 50%;
+        transform: translateX(-50%);
+        background: #333; color: white;
+        padding: 10px 20px; border-radius: 20px;
+        font-size: 0.8rem; opacity: 0; transition: 0.4s;
+        z-index: 2001;
+    }
+    #minOrderToast.show { opacity: 1; }
+    </style>
+</head>
+
+<body>
+
+<div id="scrollProgress"></div>
+<div id="minOrderToast">🛒 Order ₹100 se upar hona chahiye!</div>
+
+<header class="header" id="mainHeader">
+    <div class="logo-text">MAHESHWARI <span>SWEETS</span></div>
+    <a href="admin.html" style="text-decoration:none; color:var(--primary); font-weight:700; font-size:0.7rem; border:1px solid var(--primary); padding:4px 10px; border-radius:5px;">ADMIN</a>
+</header>
+
+<section class="hero" id="heroSection">
+    <canvas id="heroCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></canvas>
+    <h1 class="hero-title">MAHESHWARI SWEETS</h1>
+    <p style="font-size: 0.9rem; opacity: 0.9;">Raja Ulatu, Namkum — Ranchi's Favorite</p>
+</section>
+
+<div class="category-wrapper">
+    <div id="categoryTabs">
+        <button class="filter-btn active" data-filter="All">All</button>
+        <button class="filter-btn" data-filter="Breakfast">🌅 Breakfast</button>
+        <button class="filter-btn" data-filter="Sweets">🍬 Sweets</button>
+        <button class="filter-btn" data-filter="Thali">🍱 Thali</button>
+        <button class="filter-btn" data-filter="Snacks">🍿 Snacks</button>
+    </div>
+</div>
+
+<main class="product-grid" id="productGrid"></main>
+
+<a href="checkout.html" class="cart-bar" id="floatingCartBar" style="display: none;">
+    <div style="display:flex; align-items:center; gap:10px;">
+        <span>🛒</span>
+        <div>
+            <div style="font-size:0.7rem; opacity:0.8;">Your Order</div>
+            <div style="font-weight:700;"><span id="cartCount">0</span> Items</div>
+        </div>
+    </div>
+    <div style="text-align:right;">
+        <span id="cartTotal" style="background:rgba(255,255,255,0.2); padding:5px 12px; border-radius:20px; font-weight:800;">₹0</span>
+    </div>
+</a>
+
+<!-- Scripts Loading - Order matters! -->
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+
+<script>
+// --- PAGE SPECIFIC UI (Particles & Scroll only) ---
+
+// Scroll Progress
+window.addEventListener('scroll', () => {
+    const scrolled = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+    const bar = document.getElementById('scrollProgress');
+    if(bar) bar.style.width = scrolled + '%';
+});
+
+// Gold Particles (Hero Background)
+(function() {
+    const canvas = document.getElementById('heroCanvas');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let W = canvas.width = window.innerWidth;
+    let H = canvas.height = 250;
+    let particles = [];
+
+    function Particle() {
+        this.x = Math.random() * W;
+        this.y = Math.random() * H;
+        this.r = Math.random() * 2;
+        this.v = Math.random() * 0.5;
+    }
+
+    for(let i=0; i<50; i++) particles.push(new Particle());
+
+    function draw() {
+        ctx.clearRect(0,0,W,H);
+        ctx.fillStyle = "rgba(212, 175, 55, 0.3)";
+        particles.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+            ctx.fill();
+            p.y -= p.v;
+            if(p.y < 0) p.y = H;
+        });
+        requestAnimationFrame(draw);
+    }
+    draw();
+})();
+</script>
+
+</body>
+</html>

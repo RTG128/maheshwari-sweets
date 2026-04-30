@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Order - Maheshwari Sweets</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .track-wrapper { max-width: 500px; margin: 30px auto; padding: 20px; font-family: 'Segoe UI', sans-serif; }
+        .card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+        
+        /* Step Progress */
+        .step-container { display: flex; justify-content: space-between; position: relative; margin: 40px 0; }
+        .step-container::before { content: ""; position: absolute; top: 15px; left: 0; width: 100%; height: 3px; background: #eee; z-index: 1; }
+        .progress-line { position: absolute; top: 15px; left: 0; height: 3px; background: #800000; z-index: 1; transition: 0.5s; width: 0%; }
+        .step-dot { width: 30px; height: 30px; background: #eee; border-radius: 50%; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; border: 3px solid white; color: #999; }
+        .step-dot.active { background: #800000; color: white; border-color: #ffecd1; }
+        .step-label { position: absolute; top: 35px; font-size: 10px; font-weight: bold; color: #999; width: 60px; text-align: center; }
+        .step-dot.active + .step-label { color: #800000; }
+
+        .order-details { text-align: left; margin-top: 30px; border-top: 1px dashed #ccc; padding-top: 20px; }
+        .status-header { background: #800000; color: white; padding: 8px 20px; border-radius: 50px; display: inline-block; font-weight: bold; margin-bottom: 20px; }
+        .item-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 5px; color: #555; }
+        .btn-home { display: block; margin-top: 25px; background: #333; color: white; text-decoration: none; padding: 12px; border-radius: 10px; font-weight: bold; }
+    </style>
+</head>
+<body style="background: #fdf5e6;">
+
+<div class="track-wrapper">
+    <div class="card">
+        <img src="assets/images/logo.png" style="width: 70px; margin-bottom: 10px;">
+        <h3 id="display-order-id" style="margin: 0; color: #333;">Order Tracking</h3>
+        <p id="order-date" style="font-size: 12px; color: #999;"></p>
+
+        <div class="status-header" id="current-status">CONNECTING...</div>
+
+        <div class="step-container">
+            <div class="progress-line" id="progress-bar"></div>
+            
+            <div style="position: relative;">
+                <div class="step-dot" id="dot-1">1</div>
+                <div class="step-label" style="left: -15px;">Received</div>
+            </div>
+            <div style="position: relative;">
+                <div class="step-dot" id="dot-2">2</div>
+                <div class="step-label" style="left: -15px;">Accepted</div>
+            </div>
+            <div style="position: relative;">
+                <div class="step-dot" id="dot-3">3</div>
+                <div class="step-label" style="left: -15px;">On Way</div>
+            </div>
+            <div style="position: relative;">
+                <div class="step-dot" id="dot-4">4</div>
+                <div class="step-label" style="left: -15px;">Delivered</div>
+            </div>
+        </div>
+
+        <div class="order-details">
+            <p><strong>👤 Name:</strong> <span id="cust-name">---</span></p>
+            <p><strong>📍 Address:</strong> <span id="cust-addr">---</span></p>
+            <div id="items-list" style="background: #fff9f0; padding: 10px; border-radius: 10px; margin: 10px 0;">
+                Items loading...
+            </div>
+            <p style="text-align: right; font-weight: bold; font-size: 18px; color: #800000;">
+                Total: ₹<span id="grand-total">0</span>
+            </p>
+        </div>
+
+        <a href="index.html" class="btn-home">Back to Menu</a>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="js/config.js"></script>
+<script>
+    // Firebase initialize + db variable
+    const firebaseConfig = {
+        apiKey: "AIzaSyB3WDiHmiACMSvrpAP71kH5rOCLJOjZrRk",
+        authDomain: "maheshwari-sweets.firebaseapp.com",
+        databaseURL: "https://maheshwari-sweets-default-rtdb.firebaseio.com",
+        projectId: "maheshwari-sweets",
+        storageBucket: "maheshwari-sweets.firebasestorage.app",
+        messagingSenderId: "658774438028",
+        appId: "1:658774438028:web:4b43a81ac573df5b0fcba9"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+</script>
+<script src="js/track.js"></script>
+
+</body>
+</html>

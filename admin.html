@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | Maheshwari Sweets</title>
+    
+    <script>
+        if (localStorage.getItem('ms_admin_logged') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #800000;
+            --accent: #d4af37;
+            --success: #1D9E75;
+            --warning: #BA7517;
+            --danger: #A32D2D;
+            --bg: #f5f4f0;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #2c2c2c;
+        }
+
+        .admin-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px 16px 60px;
+        }
+
+        /* ── Header ── */
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--primary);
+            color: white;
+            padding: 22px 28px;
+            border-radius: 18px;
+            margin-bottom: 22px;
+            position: relative;
+            overflow: hidden;
+        }
+        .admin-header::after {
+            content: '';
+            position: absolute;
+            top: -40px; right: -40px;
+            width: 160px; height: 160px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        .admin-header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; }
+        .admin-header p  { margin: 4px 0 0; font-size: 0.78rem; opacity: 0.85; }
+
+        .header-actions { display: flex; gap: 10px; position: relative; z-index: 1; }
+
+        .btn-refresh {
+            background: rgba(255,255,255,0.15);
+            border: 1.5px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 9px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.82rem;
+            font-family: 'Poppins', sans-serif;
+            transition: background 0.2s, color 0.2s;
+        }
+        .btn-refresh:hover { background: white; color: var(--primary); }
+
+        .btn-logout {
+            background: white;
+            border: none;
+            color: var(--danger);
+            padding: 9px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.82rem;
+            font-family: 'Poppins', sans-serif;
+            transition: background 0.2s, color 0.2s;
+        }
+        .btn-logout:hover { background: var(--danger); color: white; }
+
+        /* ── Voice Alert Bar ── */
+        .voice-alert-bar {
+            background: white;
+            padding: 24px 20px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 22px;
+            border: 1.5px dashed #d0c6c6;
+        }
+        .voice-alert-bar .bell-icon { font-size: 2.2rem; margin-bottom: 10px; }
+        .voice-alert-bar h2 {
+            margin: 0 0 8px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #222;
+        }
+        .voice-alert-bar p {
+            color: #888;
+            font-size: 0.82rem;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+        #startAudioBtn {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-family: 'Poppins', sans-serif;
+            letter-spacing: 0.3px;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        #startAudioBtn:hover { transform: translateY(-2px); opacity: 0.92; }
+
+        /* ── Stats ── */
+        .order-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px 16px;
+            border-radius: 16px;
+            text-align: center;
+            border-top: 4px solid var(--primary);
+        }
+        .stat-card h3 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin: 0;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+        .stat-card p {
+            font-size: 0.7rem;
+            color: #999;
+            text-transform: uppercase;
+            margin: 8px 0 0;
+            font-weight: 600;
+            letter-spacing: 0.6px;
+        }
+
+        /* ── Live Header Row ── */
+        .section-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        .section-row h2 { margin: 0; font-size: 1.15rem; font-weight: 700; }
+
+        #syncStatus {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.72rem;
+            color: var(--success);
+            font-weight: 700;
+            letter-spacing: 0.4px;
+        }
+        .sync-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+        }
+
+        /* ── Orders List ── */
+        #ordersList { min-height: 200px; }
+        .orders-empty {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 18px;
+            border: 1px solid #eeebeb;
+            color: #bbb;
+            font-size: 0.88rem;
+        }
+
+        /* ── Pulse Animation ── */
+        .pulse {
+            animation: pulse-green 2s infinite;
+        }
+        @keyframes pulse-green {
+            0%   { box-shadow: 0 0 0 0 rgba(29,158,117,0.7); }
+            70%  { box-shadow: 0 0 0 8px rgba(29,158,117,0); }
+            100% { box-shadow: 0 0 0 0 rgba(29,158,117,0); }
+        }
+
+        /* ── Mobile ── */
+        @media (max-width: 600px) {
+            .order-stats { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .order-stats .stat-card:last-child { grid-column: span 2; }
+            .admin-header {
+                flex-direction: column;
+                text-align: center;
+                border-radius: 0 0 18px 18px;
+                margin: -20px -16px 20px;
+                padding: 20px 16px;
+            }
+            .header-actions { margin-top: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-container">
+
+        <header class="admin-header">
+            <div>
+                <h1>Admin Panel</h1>
+                <p>Maheshwari Sweets | Ranchi</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn-refresh" onclick="location.reload()">🔄 Refresh</button>
+                <button onclick="logoutAdmin()" class="btn-logout">Logout</button>
+            </div>
+        </header>
+
+        <div id="voiceAlertBox" class="voice-alert-bar">
+            <div class="bell-icon">🔔</div>
+            <h2>Enable Order Notifications?</h2>
+            <p>Naya order aate hi aapko bol kar bataya jayega.<br>Niche wala button dabayein.</p>
+            <button id="startAudioBtn">▶ Start Live Monitoring</button>
+        </div>
+
+        <div class="order-stats">
+            <div class="stat-card">
+                <h3 id="totalOrders">0</h3>
+                <p>Total Orders</p>
+            </div>
+            <div class="stat-card" style="border-top-color: var(--warning);">
+                <h3 id="pendingOrders" style="color: var(--warning);">0</h3>
+                <p>Action Required</p>
+            </div>
+            <div class="stat-card" style="border-top-color: var(--success);">
+                <h3 id="totalEarnings" style="color: var(--success);">₹0</h3>
+                <p>Success Revenue</p>
+            </div>
+        </div>
+
+        <div class="section-row">
+            <h2>Live Orders</h2>
+            <div id="syncStatus">
+                <div class="sync-dot pulse"></div>
+                REAL-TIME SYNC ON
+            </div>
+        </div>
+
+        <div id="ordersList">
+            <div class="orders-empty">
+                Connecting to Maheshwari Sweets Database...
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB3WDiHmiACMSvrpAP71kH5rOCLJOjZrRk",
+            authDomain: "maheshwari-sweets.firebaseapp.com",
+            databaseURL: "https://maheshwari-sweets-default-rtdb.firebaseio.com",
+            projectId: "maheshwari-sweets",
+            storageBucket: "maheshwari-sweets.firebasestorage.app",
+            messagingSenderId: "658774438028",
+            appId: "1:658774438028:web:4b43a81ac573df5b0fcba9",
+            measurementId: "G-B7KQDV86P5"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        function logoutAdmin() {
+            if (confirm("Bhai, logout karna hai?")) {
+                localStorage.removeItem('ms_admin_logged');
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>
