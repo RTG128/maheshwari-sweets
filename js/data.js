@@ -7,7 +7,7 @@
 const products = [
     // --- BREAKFAST ---
     { id: 'br-01', name: 'Chhola Bhatura (2 Pc)', price: 80, category: 'Breakfast', image: 'assets/images/Chola-bhatura.jpg' },
-    { id: 'br-02', name: 'Aloo Paratha', price: 40, category: 'Breakfast', image: 'assets/images/Aloo-paratha.jpg' },
+    { id: 'br-02', name: 'Aloo Paratha', price: 40, category: 'Breakfast', image: 'assets/images/aloo-paratha.jpg' },
     { id: 'br-03', name: 'Gobhi Paratha', price: 50, category: 'Breakfast', image: 'assets/images/Gobhi-paratha.jpg' },
     { id: 'br-04', name: 'Sattu Paratha', price: 50, category: 'Breakfast', image: 'assets/images/Sattu-paratha.jpg' },
     { id: 'br-05', name: 'Paneer Paratha', price: 60, category: 'Breakfast', image: 'assets/images/paneer-paratha.jpg' },
@@ -43,7 +43,7 @@ const products = [
 
     // --- NON-VEG ---
     { id: 'nv-01', name: 'Chicken Curry (4 Pc)', price: 240, category: 'Non-Veg', image: 'assets/images/Chicken-curry.jpg' },
-    { id: 'nv-02', name: 'Chicken Butter Masala', price: 280, category: 'Non-Veg', image: 'assets/images/Chicken-Butter-Masala.jpg' }, // FIXED PATH
+    { id: 'nv-02', name: 'Chicken Butter Masala', price: 280, category: 'Non-Veg', image: 'assets/images/Chicken-Butter-masala.jpg' }, // FIXED PATH
     { id: 'nv-03', name: 'Chicken Dehati (Full)', price: 550, category: 'Non-Veg', image: 'assets/images/Chicken-Dehati.jpg' },
     { id: 'nv-04', name: 'Mutton Curry (2 Pc)', price: 200, category: 'Non-Veg', image: 'assets/images/Mutton-curry.jpg' },
     { id: 'nv-05', name: 'Egg Curry (2 Pc)', price: 60, category: 'Non-Veg', image: 'assets/images/Egg-curry.jpg' },
