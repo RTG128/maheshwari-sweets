@@ -7,9 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     
-    <!-- PDF Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- Firebase Libraries -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 
@@ -24,6 +22,11 @@
         .summary-total { border-top: 1px dashed #ccc; margin-top: 10px; padding-top: 10px; font-weight: 800; font-size: 1.1rem; color: #800000; display: flex; justify-content: space-between; }
         .place-order-btn { width: 100%; background: #25D366; color: white; border: none; padding: 16px; border-radius: 15px; font-size: 1.1rem; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; }
         .min-order-msg { display: none; background: #fff3f3; border: 1.5px solid #f5c6c6; color: #800000; padding: 12px 16px; border-radius: 12px; font-size: 0.88rem; font-weight: 600; margin-top: 14px; text-align: center; }
+        #areaMsg { display: none; background: #fff3f3; border: 1.5px solid #f5c6c6; color: #800000; padding: 15px 16px; border-radius: 12px; font-size: 0.95rem; font-weight: 600; margin-top: 14px; text-align: center; }
+        #locationBox { background: #f0f9f0; border: 1.5px solid #c3e6c3; border-radius: 14px; padding: 14px 16px; margin-bottom: 18px; text-align: center; }
+        #locationBox p { margin: 0 0 10px; font-size: 0.88rem; color: #444; }
+        #checkLocationBtn { background: #800000; color: white; border: none; padding: 10px 22px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 0.9rem; }
+        #locationStatus { margin-top: 10px; font-size: 0.85rem; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -38,36 +41,107 @@
         <div class="order-summary-box">
             <h2 style="margin-bottom: 15px; font-size: 1.1rem; color: #800000;">Aapka Order List</h2>
             <div id="orderReview"></div>
-            <div class="min-order-msg" id="minOrderMsg">⚠️ Minimum order ₹100 ka hona chahiye. Aur items add karein!</div>
+            <div class="min-order-msg" id="minOrderMsg">Minimum order Rs.100 ka hona chahiye. Aur items add karein!</div>
         </div>
 
         <div class="checkout-card">
             <h2 style="margin-bottom: 20px; font-size: 1.2rem;">Delivery Information</h2>
+
+            <div id="locationBox">
+                <p>Pehle apni location check karein — hum sirf 7km ke andar delivery karte hain.</p>
+                <button type="button" id="checkLocationBtn" onclick="checkUserLocation()">Apni Location Check Karein</button>
+                <div id="locationStatus"></div>
+            </div>
+            <div id="areaMsg"><strong>Sorry!</strong> Is area mein abhi service available nahi hai. Hum sirf 7km ke andar delivery karte hain.</div>
+
             <form id="finalOrderForm">
                 <div class="form-group"><label>Aapka Naam</label><input type="text" id="custName" class="form-control" required></div>
                 <div class="form-group"><label>WhatsApp Number</label><input type="tel" id="custPhone" class="form-control" required></div>
                 <div class="form-group"><label>Pura Pata</label><textarea id="custAddress" class="form-control" rows="3" required></textarea></div>
                 <div class="form-group"><label>Landmark</label><input type="text" id="custLandmark" class="form-control"></div>
-                <button type="submit" class="place-order-btn">Confirm & Get Bill</button>
+                <button type="submit" class="place-order-btn" id="submitBtn">Confirm & Get Bill</button>
             </form>
         </div>
     </div>
 
     <script>
-        // 1. Firebase Configuration
+        const SHOP_LAT = 23.3341;
+        const SHOP_LNG = 85.4243;
+        const MAX_DISTANCE_KM = 7;
+
+        let locationApproved = false;
+
+        function getDistanceKm(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+
+        function checkUserLocation() {
+            const btn = document.getElementById('checkLocationBtn');
+            const statusEl = document.getElementById('locationStatus');
+
+            if (!navigator.geolocation) {
+                statusEl.innerHTML = '<span style="color:#800000;">Aapka browser location support nahi karta.</span>';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = 'Location dhundh raha hai...';
+            statusEl.innerHTML = '<span style="color:#888;">Please wait...</span>';
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+                    const distance = getDistanceKm(SHOP_LAT, SHOP_LNG, userLat, userLng);
+                    const distanceRounded = distance.toFixed(1);
+
+                    if (distance <= MAX_DISTANCE_KM) {
+                        locationApproved = true;
+                        document.getElementById('locationBox').style.background = '#e8f5e9';
+                        document.getElementById('locationBox').style.borderColor = '#4CAF50';
+                        statusEl.innerHTML = '<span style="color:#2e7d32;">Aap ' + distanceRounded + ' km door hain — Delivery available hai!</span>';
+                        btn.innerHTML = 'Location Verified';
+                        document.getElementById('areaMsg').style.display = 'none';
+                    } else {
+                        locationApproved = false;
+                        document.getElementById('locationBox').style.display = 'none';
+                        document.getElementById('areaMsg').style.display = 'block';
+                        document.getElementById('submitBtn').disabled = true;
+                        document.getElementById('submitBtn').style.background = '#ccc';
+                        document.getElementById('submitBtn').style.cursor = 'not-allowed';
+                    }
+                },
+                function(error) {
+                    btn.disabled = false;
+                    btn.innerHTML = 'Dobara Try Karein';
+                    if (error.code === 1) {
+                        statusEl.innerHTML = '<span style="color:#800000;">Location permission den — browser settings mein allow karein.</span>';
+                    } else {
+                        statusEl.innerHTML = '<span style="color:#800000;">Location nahi mili, dobara try karein.</span>';
+                    }
+                },
+                { timeout: 10000, maximumAge: 0 }
+            );
+        }
+
         const firebaseConfig = {
             apiKey: "AIzaSyB3WDiHmiACMSvrpAP71kH5rOCLJOjZrRk",
-            authDomain: "maheshwari-sweets.firebaseapp.com",
-            databaseURL: "https://maheshwari-sweets-default-rtdb.firebaseio.com",
-            projectId: "maheshwari-sweets",
-            storageBucket: "maheshwari-sweets.firebasestorage.app",
+            authDomain: "maheshwari-sweets-new.firebaseapp.com",
+            databaseURL: "https://maheshwari-sweets-new-default-rtdb.firebaseio.com",
+            projectId: "maheshwari-sweets-new",
+            storageBucket: "maheshwari-sweets-new.firebasestorage.app",
             messagingSenderId: "658774438028",
             appId: "1:658774438028:web:4b43a81ac573df5b0fcba9"
         };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // 2. Render Order
         function renderOrder() {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             const container = document.getElementById('orderReview');
@@ -75,14 +149,13 @@
             let html = '', total = 0;
             cart.forEach(item => {
                 const qty = item.quantity || item.qty || 0;
-                html += `<div class="summary-item"><span>${item.name} (x${qty})</span><span>₹${item.price * qty}</span></div>`;
+                html += '<div class="summary-item"><span>' + item.name + ' (x' + qty + ')</span><span>Rs.' + (item.price * qty) + '</span></div>';
                 total += (item.price * qty);
             });
-            html += `<div class="summary-total"><span>Total Amount</span><span>₹${total}</span></div>`;
+            html += '<div class="summary-total"><span>Total Amount</span><span>Rs.' + total + '</span></div>';
             container.innerHTML = html;
         }
 
-        // 3. Generate PDF Invoice
         function downloadInvoice(name, phone, address, cart, total, landmark) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
@@ -185,9 +258,15 @@
             doc.save('Bill_' + name + '.pdf');
         }
 
-        // 4. Submit Order (Firebase + PDF + Redirect)
         document.getElementById('finalOrderForm').addEventListener('submit', function(e) {
             e.preventDefault();
+
+            if (!locationApproved) {
+                document.getElementById('locationBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                document.getElementById('locationStatus').innerHTML = '<span style="color:#800000;">Pehle apni location verify karein!</span>';
+                return;
+            }
+
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             const name = document.getElementById('custName').value;
             const phone = document.getElementById('custPhone').value;
@@ -195,7 +274,6 @@
             const landmark = document.getElementById('custLandmark').value;
             let total = cart.reduce((s, i) => s + (i.price * (i.quantity || i.qty)), 0);
 
-            // Minimum Order Filter
             if (total < 100) {
                 const msg = document.getElementById('minOrderMsg');
                 msg.style.display = 'block';
@@ -203,32 +281,37 @@
                 return;
             }
 
+            const generatedOrderId = Math.floor(1000 + Math.random() * 9000);
+
             const orderData = {
+                orderId: generatedOrderId,
                 customerName: name,
-                customerPhone: phone,
+                phone: phone,
                 address: address,
                 landmark: landmark,
-                items: cart,
+                items: cart.map(i => ({
+                    name: i.name,
+                    price: i.price,
+                    qty: i.quantity || i.qty || 1,
+                    quantity: i.quantity || i.qty || 1
+                })),
                 totalAmount: total,
+                summary: { grandTotal: total },
+                customer: { name: name, phone: phone, address: address, landmark: landmark },
                 status: "Pending",
                 timestamp: Date.now()
             };
 
-            // Send to Firebase
             database.ref('orders').push(orderData).then((ref) => {
-                // Download Bill
                 downloadInvoice(name, phone, address, cart, total, landmark);
-
-                // Order key & time save karo my-order ke liye
                 localStorage.setItem('last_order_key', ref.key);
+                localStorage.setItem('last_order_id', generatedOrderId);
                 localStorage.setItem('last_order_time', Date.now());
-
                 localStorage.removeItem('cart');
-                window.location.href = "my-order.html";
+                window.location.href = "my-order.html?id=" + ref.key;
             });
         });
 
-        // 5. DOMContentLoaded - bahar hai, sahi jagah
         document.addEventListener('DOMContentLoaded', renderOrder);
     </script>
 </body>

@@ -10,8 +10,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // Safe global reference for new Firebase database connection
+    const currentDb = window.db || firebase.database();
+
     // Firebase se direct key se data lo
-    db.ref('orders/' + orderKey).on('value', (snapshot) => {
+    currentDb.ref('orders/' + orderKey).on('value', (snapshot) => {
         if (snapshot.exists()) {
             const data = snapshot.val();
             updateTrackingUI(data, orderKey);
@@ -47,15 +50,22 @@ function updateTrackingUI(data, orderKey) {
             : '#800000';
     }
 
-    // Customer details — Firebase mein customerName/customerPhone/address hai
+    // Customer details — FIXED: Handled object nested data mapping safely
     const nameEl = document.getElementById('cust-name');
     const addrEl = document.getElementById('cust-addr');
-    if (nameEl) nameEl.innerText = data.customerName || '---';
-    if (addrEl) addrEl.innerText = data.address + (data.landmark ? ' | ' + data.landmark : '') || '---';
+    
+    const customerName = data.customerName || (data.customer && data.customer.name) || '---';
+    const customerAddress = data.address || (data.customer && data.customer.address) || '---';
+    const customerLandmark = data.landmark || (data.customer && data.customer.landmark) || '';
 
-    // Total — Firebase mein totalAmount hai
+    if (nameEl) nameEl.innerText = customerName;
+    if (addrEl) addrEl.innerText = customerAddress + (customerLandmark ? ' | ' + customerLandmark : '');
+
+    // Total — FIXED: Fallback to grandTotal from checkout summary object
     const totalEl = document.getElementById('grand-total');
-    if (totalEl) totalEl.innerText = data.totalAmount || 0;
+    if (totalEl) {
+        totalEl.innerText = data.totalAmount || (data.summary && data.summary.grandTotal) || 0;
+    }
 
     // Items — quantity/qty dono handle karo
     const itemsBox = document.getElementById('items-list');
@@ -84,7 +94,7 @@ function updateProgressBar(status) {
     let width = "0%";
     let step = 1;
 
-    if (status === 'Accepted')                              { step = 2; width = "33%"; }
+    if (status === 'Accepted')                             { step = 2; width = "33%"; }
     else if (status === 'Out for Delivery' || status === 'On the Way') { step = 3; width = "66%"; }
     else if (status === 'Delivered')                        { step = 4; width = "100%"; }
 
@@ -99,7 +109,6 @@ function updateProgressBar(status) {
 }
 
 function showCancelOption(status, orderKey) {
-    // Purana cancel box hata do agar pehle se hai
     const existing = document.getElementById('cancel-box');
     if (existing) existing.remove();
 
@@ -107,11 +116,10 @@ function showCancelOption(status, orderKey) {
 
     const orderTime = parseInt(localStorage.getItem('last_order_time') || '0');
     const elapsed = Date.now() - orderTime;
-    const remaining = 120000 - elapsed; // 2 min = 120000ms
+    const remaining = 120000 - elapsed; 
 
     if (remaining <= 0) return;
 
-    // Cancel box banao
     const box = document.createElement('div');
     box.id = 'cancel-box';
     box.style.cssText = 'margin-top:20px; background:#fff3f3; border:1.5px solid #f5c6c6; border-radius:14px; padding:15px; text-align:center;';
@@ -123,11 +131,9 @@ function showCancelOption(status, orderKey) {
         </button>
     `;
 
-    // Back to Menu button ke pehle insert karo
     const btnHome = document.querySelector('.btn-home');
     if (btnHome) btnHome.parentNode.insertBefore(box, btnHome);
 
-    // Countdown timer
     let timeLeft = Math.floor(remaining / 1000);
     const timerEl = document.getElementById('cancel-timer');
 
@@ -144,10 +150,10 @@ function showCancelOption(status, orderKey) {
     }
     updateTimer();
 
-    // Cancel button click
     document.getElementById('cancelBtn').addEventListener('click', function() {
         if (confirm('Pakka cancel karna hai?')) {
-            db.ref('orders/' + orderKey).update({ status: 'Cancelled' }).then(() => {
+            const currentDb = window.db || firebase.database();
+            currentDb.ref('orders/' + orderKey).update({ status: 'Cancelled' }).then(() => {
                 box.remove();
                 const statusBox = document.getElementById('current-status');
                 if (statusBox) {

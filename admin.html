@@ -279,20 +279,21 @@
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyB3WDiHmiACMSvrpAP71kH5rOCLJOjZrRk",
-            authDomain: "maheshwari-sweets.firebaseapp.com",
-            databaseURL: "https://maheshwari-sweets-default-rtdb.firebaseio.com",
-            projectId: "maheshwari-sweets",
-            storageBucket: "maheshwari-sweets.firebasestorage.app",
-            messagingSenderId: "658774438028",
-            appId: "1:658774438028:web:4b43a81ac573df5b0fcba9",
-            measurementId: "G-B7KQDV86P5"
-        };
+      // ====== IS CONFIG KO ADMIN.HTML MEIN UPDATE KAREIN ======
+const firebaseConfig = {
+    apiKey: "AIzaSyB3WDiHmiACMSvrpAP71kH5rOCLJOjZrRk", 
+    authDomain: "maheshwari-sweets-new.firebaseapp.com",
+    databaseURL: "https://maheshwari-sweets-new-default-rtdb.firebaseio.com", // Updated to new DB
+    projectId: "maheshwari-sweets-new",
+    storageBucket: "maheshwari-sweets-new.firebasestorage.app",
+    messagingSenderId: "658774438028",
+    appId: "1:658774438028:web:4b43a81ac573df5b0fcba9"
+};
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+window.db = firebase.database();
         function logoutAdmin() {
             if (confirm("Bhai, logout karna hai?")) {
                 localStorage.removeItem('ms_admin_logged');

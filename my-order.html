@@ -74,18 +74,21 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 <script src="js/config.js"></script>
 <script>
-    // Firebase initialize + db variable
-    const firebaseConfig = {
-        apiKey: "AIzaSyB3WDiHmiACMSvrpAP71kH5rOCLJOjZrRk",
-        authDomain: "maheshwari-sweets.firebaseapp.com",
-        databaseURL: "https://maheshwari-sweets-default-rtdb.firebaseio.com",
-        projectId: "maheshwari-sweets",
-        storageBucket: "maheshwari-sweets.firebasestorage.app",
-        messagingSenderId: "658774438028",
-        appId: "1:658774438028:web:4b43a81ac573df5b0fcba9"
-    };
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    // ====== IS CONFIG KO MY-ORDER.HTML MEIN UPDATE KAREIN ======
+const firebaseConfig = {
+    apiKey: "AIzaSyB3WDiHmiACMSvrpAP71kH5rOCLJOjZrRk", 
+    authDomain: "maheshwari-sweets-new.firebaseapp.com",
+    databaseURL: "https://maheshwari-sweets-new-default-rtdb.firebaseio.com", // Updated to new DB
+    projectId: "maheshwari-sweets-new",
+    storageBucket: "maheshwari-sweets-new.firebasestorage.app",
+    messagingSenderId: "658774438028",
+    appId: "1:658774438028:web:4b43a81ac573df5b0fcba9"
+};
+
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+window.db = firebase.database();
 </script>
 <script src="js/track.js"></script>
 

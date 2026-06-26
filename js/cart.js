@@ -1,12 +1,6 @@
-/* ============================================================
-   MAHESHWARI SWEETS - FINAL STABLE LOGIC (FIXED)
-   ============================================================ */
-
 document.addEventListener('DOMContentLoaded', () => {
-    // Force stop loading spinner after 2.5 seconds
     setTimeout(() => {
         window.stop();
-        console.log("Loading stopped to enable clicks. - cart.js:9");
     }, 2500);
 
     if (typeof products !== 'undefined') {
@@ -43,12 +37,98 @@ function renderProducts(items) {
                 <span class="cat-label">${p.category}</span>
                 <h3 class="p-name">${p.name}</h3>
                 <div class="price-row">
-                    <span class="p-price">₹${p.price}</span>
+                    <span class="p-price">Rs.${p.price}</span>
                     <div id="btn-container-${p.id}">${buttonHTML}</div>
                 </div>
             </div>
         </div>`;
     }).join('');
+}
+
+// Suggestion Rules — category ke basis pe suggest karo
+// Chinese add karo → Samosa suggest
+// Breakfast add karo → Gulab Jamun suggest
+// Rolls add karo → Jalebi suggest
+// Thali add karo → Gulab Jamun suggest
+// Snacks add karo → Veg Chowmein suggest
+// Veg-Main add karo → Jalebi suggest
+// Non-Veg add karo → Sponge Rasgulla suggest
+// Sweets add karo → Chhola Bhatura suggest
+const SUGGESTION_RULES = {
+    'Chinese':   'br-09',
+    'Breakfast': 'sw-01',
+    'Rolls':     'br-13',
+    'Thali':     'sw-01',
+    'Snacks':    'ch-01',
+    'Veg-Main':  'br-13',
+    'Non-Veg':   'sw-02',
+    'Sweets':    'br-01'
+};
+
+function showSuggestionPopup(addedProduct) {
+    const existing = document.getElementById('suggestion-popup');
+    if (existing) existing.remove();
+
+    const suggestId = SUGGESTION_RULES[addedProduct.category];
+    if (!suggestId) return;
+
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const alreadyInCart = cart.find(i => i.id === suggestId);
+    if (alreadyInCart) return;
+
+    const item = products.find(p => p.id === suggestId);
+    if (!item) return;
+
+    const popup = document.createElement('div');
+    popup.id = 'suggestion-popup';
+    popup.style.cssText = `
+        position: fixed;
+        bottom: 90px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        border: 2px solid #d4af37;
+        border-radius: 16px;
+        padding: 14px 16px;
+        width: 88%;
+        max-width: 400px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        z-index: 3000;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        animation: slideUp 0.3s ease;
+    `;
+
+    popup.innerHTML = `
+        <style>
+            @keyframes slideUp {
+                from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+                to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+            }
+        </style>
+        <div style="flex:1;">
+            <div style="font-size:0.7rem; color:#800000; font-weight:700; text-transform:uppercase; margin-bottom:3px;">Aapko Pasand Aayega</div>
+            <div style="font-size:0.95rem; font-weight:700; color:#333;">${item.name}</div>
+            <div style="font-size:0.85rem; color:#800000; font-weight:800;">Rs.${item.price}</div>
+        </div>
+        <button onclick="handleCartUpdate('${item.id}', 'ADD'); document.getElementById('suggestion-popup').remove();"
+            style="background:#800000; color:white; border:none; padding:10px 16px; border-radius:10px; font-weight:700; cursor:pointer; font-size:0.85rem; white-space:nowrap;">
+            Add +
+        </button>
+        <button onclick="document.getElementById('suggestion-popup').remove();"
+            style="background:#f0f0f0; color:#555; border:none; padding:10px 12px; border-radius:10px; font-weight:700; cursor:pointer; font-size:0.85rem;">
+            X
+        </button>
+    `;
+
+    document.body.appendChild(popup);
+
+    setTimeout(() => {
+        const p = document.getElementById('suggestion-popup');
+        if (p) p.remove();
+    }, 4000);
 }
 
 function handleCartUpdate(productId, action) {
@@ -60,7 +140,10 @@ function handleCartUpdate(productId, action) {
 
     if (action === 'ADD') {
         if (itemIndex > -1) cart[itemIndex].quantity += 1;
-        else cart.push({ ...product, quantity: 1 });
+        else {
+            cart.push({ ...product, quantity: 1 });
+            showSuggestionPopup(product);
+        }
     } else {
         if (itemIndex > -1) {
             if (cart[itemIndex].quantity > 1) cart[itemIndex].quantity -= 1;
@@ -70,8 +153,7 @@ function handleCartUpdate(productId, action) {
 
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartUI();
-    
-    // Refresh only the items currently on screen
+
     const currentFilter = document.querySelector('.filter-btn.active')?.getAttribute('data-filter') || 'All';
     const filteredItems = (currentFilter === 'All') ? products : products.filter(p => p.category === currentFilter);
     renderProducts(filteredItems);
@@ -88,12 +170,11 @@ function updateCartUI() {
     if (cart.length > 0) {
         const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
         const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        
+
         cartBar.style.display = 'flex';
         if (cartCount) cartCount.innerText = totalQty;
-        if (cartTotal) cartTotal.innerText = `₹${totalPrice}`;
-        
-        // Min order ₹100 color logic
+        if (cartTotal) cartTotal.innerText = 'Rs.' + totalPrice;
+
         cartBar.style.background = totalPrice < 100 ? "#555" : "#800000";
     } else {
         cartBar.style.display = 'none';

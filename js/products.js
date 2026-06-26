@@ -15,7 +15,7 @@ async function loadProducts() {
         console.log("✅ Live Menu Loaded - products.js:15");
 
     } catch (error) {
-        console.log("⚠️ Server se connect nahi ho paye, Backup Menu use kar rahe hain. - products.js:18");
+        console.log("Server se connect nahi ho paye, Backup Menu use kar rahe hain. - products.js:18");
         
         // 2. BACKUP MENU (Agar JSON file load na ho toh ye chalega)
         PRODUCTS = [

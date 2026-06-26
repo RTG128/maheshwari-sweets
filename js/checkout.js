@@ -142,36 +142,38 @@ async function handleCheckout(e) {
     };
 
     try {
-       // --- STEP 1: FIREBASE SYNC ---
-        const newOrderRef = db.ref('orders').push(); // Pehle reference banaya
+        // Safe database connection initialization right before using
+        const currentDb = window.db || firebase.database();
+        
+        // --- STEP 1: FIREBASE SYNC ---
+        const newOrderRef = currentDb.ref('orders').push(); // Pehle reference banaya
         const firebaseId = newOrderRef.key; // Firebase ki unique key nikaali (e.g. -OKmZ...)
         
         await newOrderRef.set(orderData); // Ab data save kiya
-        console.log("Database updated with Firebase ID: - checkout.js:150", firebaseId);
+        console.log("Database updated with Firebase ID: - checkout.js:153", firebaseId);
 
-        // --- STEP 2: SAVE FOR TRACKING ---
-        // Ab hum random 'currentOrderId' ki jagah 'firebaseId' save karenge
-        localStorage.setItem('last_order_id', firebaseId);
+        // --- STEP 2: SAVE FOR TRACKING --- ✅ FIXED: firebaseId save ho raha hai
+        localStorage.setItem('last_order_key', firebaseId);
+        localStorage.setItem('last_order_time', Date.now());
 
         // --- STEP 3: PDF GENERATION ---
         btn.innerHTML = "BILL DOWNLOAD HO RAHA HAI...";
         await generatePDFInvoice(orderData);
 
-       // --- STEP 4: FINAL SUCCESS (checkout.js mein ye replace karein) ---
-btn.innerHTML = "ORDER SUCCESSFUL!";
+        // --- STEP 4: FINAL SUCCESS ---
+        btn.innerHTML = "ORDER SUCCESSFUL!";
 
-// Cart clear karein
-localStorage.removeItem('ms_cart');
+        // Cart clear karein
+        localStorage.removeItem('ms_cart');
 
-setTimeout(() => {
-    alert("Dhanyawad! Order mil gaya hai.");
-    
-    // YAHAN DHAYAN DEIN: Link mein ID pass karna MUST hai
-    // Hum wahi random ID bhej rahe hain jo upar 'currentOrderId' mein bani thi
-    window.location.href = "my-order.html?id=" + currentOrderId; 
-}, 1000);
+        setTimeout(() => {
+            alert("Dhanyawad! Order mil gaya hai.");
+            
+            // ✅ FIXED: firebaseId URL mein ja raha hai, currentOrderId nahi
+            window.location.href = "my-order.html?id=" + firebaseId;
+        }, 1000);
     } catch (err) {
-        console.error("Order Error: - checkout.js:174", err);
+        console.error("Order Error: - checkout.js:176", err);
         alert("Server connection fail! Check your internet.");
         btn.disabled = false;
         btn.innerHTML = "Confirm Order";
