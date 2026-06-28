@@ -27,6 +27,26 @@
         #locationBox p { margin: 0 0 10px; font-size: 0.88rem; color: #444; }
         #checkLocationBtn { background: #800000; color: white; border: none; padding: 10px 22px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 0.9rem; }
         #locationStatus { margin-top: 10px; font-size: 0.85rem; font-weight: 600; }
+
+        /* Payment Mode Styles */
+        .payment-section { margin-bottom: 20px; }
+        .payment-section label { display: block; font-weight: 600; margin-bottom: 10px; font-size: 0.9rem; color: #800000; }
+        .payment-options { display: flex; gap: 12px; }
+        .payment-opt { flex: 1; border: 2px solid #f0f0f0; border-radius: 12px; padding: 14px; text-align: center; cursor: pointer; transition: all 0.2s; background: #fafafa; }
+        .payment-opt:hover { border-color: #800000; }
+        .payment-opt.selected { border-color: #800000; background: #fff5f5; }
+        .payment-opt input { display: none; }
+        .payment-opt .opt-icon { font-size: 1.5rem; margin-bottom: 4px; }
+        .payment-opt .opt-label { font-size: 0.85rem; font-weight: 700; color: #333; }
+        .payment-opt .opt-sub { font-size: 0.7rem; color: #888; margin-top: 2px; }
+
+        /* UPI QR Box */
+        #upiBox { display: none; background: #fff9f0; border: 1.5px solid #d4af37; border-radius: 16px; padding: 20px; margin-bottom: 20px; text-align: center; }
+        #upiBox h3 { color: #800000; font-size: 1rem; margin: 0 0 5px; }
+        #upiBox p { font-size: 0.8rem; color: #666; margin: 0 0 15px; }
+        #upiBox img { width: 200px; height: 200px; border-radius: 12px; border: 2px solid #d4af37; object-fit: contain; }
+        #upiBox .upi-id { margin-top: 12px; background: #fff; border: 1.5px solid #d4af37; border-radius: 10px; padding: 10px 14px; font-size: 0.9rem; font-weight: 700; color: #800000; letter-spacing: 0.5px; }
+        #upiBox .upi-note { margin-top: 10px; font-size: 0.78rem; color: #888; background: #fff3f3; padding: 8px 12px; border-radius: 8px; }
     </style>
 </head>
 <body>
@@ -59,6 +79,33 @@
                 <div class="form-group"><label>WhatsApp Number</label><input type="tel" id="custPhone" class="form-control" required></div>
                 <div class="form-group"><label>Pura Pata</label><textarea id="custAddress" class="form-control" rows="3" required></textarea></div>
                 <div class="form-group"><label>Landmark</label><input type="text" id="custLandmark" class="form-control"></div>
+
+                <!-- PAYMENT MODE SECTION -->
+                <div class="payment-section">
+                    <label>Payment Mode Chunein</label>
+                    <div class="payment-options">
+                        <div class="payment-opt" id="opt-cod" onclick="selectPayment('cod')">
+                            <div class="opt-icon"></div>
+                            <div class="opt-label">Cash on Delivery</div>
+                            <div class="opt-sub">Delivery pe cash dein</div>
+                        </div>
+                        <div class="payment-opt" id="opt-upi" onclick="selectPayment('upi')">
+                            <div class="opt-icon"></div>
+                            <div class="opt-label">UPI / Online</div>
+                            <div class="opt-sub">GPay, PhonePe, Paytm, Fampay, etc</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- UPI QR BOX - sirf UPI select hone pe dikhega -->
+                <div id="upiBox">
+                    <h3>UPI se Payment Karein</h3>
+                    <p>Neeche QR scan karein ya UPI ID pe directly bhejein</p>
+                    <img src="assets/images/upi-qr.jpg" alt="UPI QR Code" onerror="this.src='https://placehold.co/200x200?text=QR+Code'">
+                    <div class="upi-id">UPI ID: 6299594980@okbizaxis</div>
+                    <div class="upi-note">Payment karne ke baad Order Confirm karein — screenshot lena na bhulein!</div>
+                </div>
+
                 <button type="submit" class="place-order-btn" id="submitBtn">Confirm & Get Bill</button>
             </form>
         </div>
@@ -70,6 +117,15 @@
         const MAX_DISTANCE_KM = 7;
 
         let locationApproved = false;
+        let selectedPayment = '';
+
+        function selectPayment(mode) {
+            selectedPayment = mode;
+            document.getElementById('opt-cod').classList.remove('selected');
+            document.getElementById('opt-upi').classList.remove('selected');
+            document.getElementById('opt-' + mode).classList.add('selected');
+            document.getElementById('upiBox').style.display = mode === 'upi' ? 'block' : 'none';
+        }
 
         function getDistanceKm(lat1, lon1, lat2, lon2) {
             const R = 6371;
@@ -156,7 +212,7 @@
             container.innerHTML = html;
         }
 
-        function downloadInvoice(name, phone, address, cart, total, landmark) {
+        function downloadInvoice(name, phone, address, cart, total, landmark, paymentMode) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const pageW = doc.internal.pageSize.getWidth();
@@ -197,6 +253,7 @@
             doc.setTextColor(130, 130, 130);
             doc.setFontSize(9);
             doc.text('Date: ' + dateStr + '  |  Time: ' + timeStr, pageW - margin, afterAddress + 2, { align: 'right' });
+            doc.text('Payment: ' + (paymentMode === 'upi' ? 'UPI / Online' : 'Cash on Delivery'), margin, afterAddress + 2);
 
             doc.setDrawColor(212, 175, 55);
             doc.setLineWidth(0.5);
@@ -267,6 +324,11 @@
                 return;
             }
 
+            if (!selectedPayment) {
+                alert('Payment mode chunein — COD ya UPI!');
+                return;
+            }
+
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             const name = document.getElementById('custName').value;
             const phone = document.getElementById('custPhone').value;
@@ -289,6 +351,7 @@
                 phone: phone,
                 address: address,
                 landmark: landmark,
+                paymentMode: selectedPayment === 'upi' ? 'UPI / Online' : 'Cash on Delivery',
                 items: cart.map(i => ({
                     name: i.name,
                     price: i.price,
@@ -303,7 +366,7 @@
             };
 
             database.ref('orders').push(orderData).then((ref) => {
-                downloadInvoice(name, phone, address, cart, total, landmark);
+                downloadInvoice(name, phone, address, cart, total, landmark, selectedPayment);
                 localStorage.setItem('last_order_key', ref.key);
                 localStorage.setItem('last_order_id', generatedOrderId);
                 localStorage.setItem('last_order_time', Date.now());

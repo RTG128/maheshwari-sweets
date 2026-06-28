@@ -6,7 +6,7 @@
 
 const products = [
     // --- BREAKFAST ---
-    { id: 'br-01', name: 'Chhola Bhatura (2 Pc)', price: 80, category: 'Breakfast', image: 'assets/images/Chola-bhatura.jpg' },
+    { id: 'br-01', name: 'Chhola Bhatura (2 Pc)', price: 80, category: 'Breakfast', image: 'assets/images/Chhola-Bhatura.jpg' },
     { id: 'br-02', name: 'Aloo Paratha', price: 40, category: 'Breakfast', image: 'assets/images/aloo-paratha.jpg' },
     { id: 'br-03', name: 'Gobhi Paratha', price: 50, category: 'Breakfast', image: 'assets/images/Gobhi-paratha.jpg' },
     { id: 'br-04', name: 'Sattu Paratha', price: 50, category: 'Breakfast', image: 'assets/images/Sattu-paratha.jpg' },
