@@ -42,7 +42,6 @@
             padding: 20px 16px 60px;
         }
 
-        /* ── Header ── */
         .admin-header {
             display: flex;
             justify-content: space-between;
@@ -66,7 +65,7 @@
         .admin-header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; }
         .admin-header p  { margin: 4px 0 0; font-size: 0.78rem; opacity: 0.85; }
 
-        .header-actions { display: flex; gap: 10px; position: relative; z-index: 1; }
+        .header-actions { display: flex; gap: 10px; position: relative; z-index: 1; flex-wrap: wrap; }
 
         .btn-refresh {
             background: rgba(255,255,255,0.15);
@@ -82,6 +81,20 @@
         }
         .btn-refresh:hover { background: white; color: var(--primary); }
 
+        .btn-clear {
+            background: rgba(220,53,69,0.2);
+            border: 1.5px solid rgba(220,53,69,0.5);
+            color: white;
+            padding: 9px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.82rem;
+            font-family: 'Poppins', sans-serif;
+            transition: background 0.2s, color 0.2s;
+        }
+        .btn-clear:hover { background: #dc3545; color: white; }
+
         .btn-logout {
             background: white;
             border: none;
@@ -96,7 +109,6 @@
         }
         .btn-logout:hover { background: var(--danger); color: white; }
 
-        /* ── Voice Alert Bar ── */
         .voice-alert-bar {
             background: white;
             padding: 24px 20px;
@@ -133,7 +145,6 @@
         }
         #startAudioBtn:hover { transform: translateY(-2px); opacity: 0.92; }
 
-        /* ── Stats ── */
         .order-stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -163,7 +174,6 @@
             letter-spacing: 0.6px;
         }
 
-        /* ── Live Header Row ── */
         .section-row {
             display: flex;
             justify-content: space-between;
@@ -188,7 +198,6 @@
             border-radius: 50%;
         }
 
-        /* ── Orders List ── */
         #ordersList { min-height: 200px; }
         .orders-empty {
             text-align: center;
@@ -200,7 +209,6 @@
             font-size: 0.88rem;
         }
 
-        /* ── Pulse Animation ── */
         .pulse {
             animation: pulse-green 2s infinite;
         }
@@ -210,7 +218,6 @@
             100% { box-shadow: 0 0 0 0 rgba(29,158,117,0); }
         }
 
-        /* ── Mobile ── */
         @media (max-width: 600px) {
             .order-stats { grid-template-columns: 1fr 1fr; gap: 12px; }
             .order-stats .stat-card:last-child { grid-column: span 2; }
@@ -235,7 +242,8 @@
                 <p>Maheshwari Sweets | Ranchi</p>
             </div>
             <div class="header-actions">
-                <button class="btn-refresh" onclick="location.reload()">🔄 Refresh</button>
+                <button class="btn-refresh" onclick="location.reload()">Refresh</button>
+                <button class="btn-clear" onclick="clearOldOrders()">Clear old orders</button>
                 <button onclick="logoutAdmin()" class="btn-logout">Logout</button>
             </div>
         </header>
@@ -244,7 +252,7 @@
             <div class="bell-icon">🔔</div>
             <h2>Enable Order Notifications?</h2>
             <p>Naya order aate hi aapko bol kar bataya jayega.<br>Niche wala button dabayein.</p>
-            <button id="startAudioBtn">▶ Start Live Monitoring</button>
+            <button id="startAudioBtn">Start Live Monitoring</button>
         </div>
 
         <div class="order-stats">
@@ -279,21 +287,21 @@
     </div>
 
     <script>
-      // ====== IS CONFIG KO ADMIN.HTML MEIN UPDATE KAREIN ======
-const firebaseConfig = {
-    apiKey: "AIzaSyB3WDiHmiACMSvrpAP71kH5rOCLJOjZrRk", 
-    authDomain: "maheshwari-sweets-new.firebaseapp.com",
-    databaseURL: "https://maheshwari-sweets-new-default-rtdb.firebaseio.com", // Updated to new DB
-    projectId: "maheshwari-sweets-new",
-    storageBucket: "maheshwari-sweets-new.firebasestorage.app",
-    messagingSenderId: "658774438028",
-    appId: "1:658774438028:web:4b43a81ac573df5b0fcba9"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyB3WDiHmiACMSvrpAP71kH5rOCLJOjZrRk", 
+            authDomain: "maheshwari-sweets-new.firebaseapp.com",
+            databaseURL: "https://maheshwari-sweets-new-default-rtdb.firebaseio.com",
+            projectId: "maheshwari-sweets-new",
+            storageBucket: "maheshwari-sweets-new.firebasestorage.app",
+            messagingSenderId: "658774438028",
+            appId: "1:658774438028:web:4b43a81ac573df5b0fcba9"
+        };
 
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
-window.db = firebase.database();
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        window.db = firebase.database();
+
         function logoutAdmin() {
             if (confirm("Bhai, logout karna hai?")) {
                 localStorage.removeItem('ms_admin_logged');

@@ -109,7 +109,6 @@ function renderOrders(orders) {
         const isPaid = order.paymentStatus === 'Paid';
         const isUPI = order.paymentMode === 'UPI / Online';
 
-        // Payment badge
         const paymentBadge = `
             <span style="
                 background: ${isPaid ? '#e8f5e9' : '#fff3f3'};
@@ -122,7 +121,6 @@ function renderOrders(orders) {
             ">${isPaid ? 'PAID' : 'UNPAID'}</span>
         `;
 
-        // Mark as Paid button — sirf UPI orders pe dikhega aur sirf tab tak jab Unpaid ho
         const markPaidBtn = (isUPI && !isPaid) ? `
             <button onclick="markAsPaid('${order.firebaseKey}')" style="
                 background: #e8f5e9;
@@ -202,7 +200,7 @@ function renderOrders(orders) {
                     <button onclick="updateStatus('${order.firebaseKey}', 'Accepted')" style="background:#007bff; color:white; border:none; padding:12px; border-radius:10px; cursor:pointer; font-weight:700; font-size:0.8rem; transition:0.3s;">Accept</button>
                     <button onclick="updateStatus('${order.firebaseKey}', 'Delivered')" style="background:#28a745; color:white; border:none; padding:12px; border-radius:10px; cursor:pointer; font-weight:700; font-size:0.8rem; transition:0.3s;">Done</button>
                     <button onclick="updateStatus('${order.firebaseKey}', 'Rejected')" style="background:#dc3545; color:white; border:none; padding:12px; border-radius:10px; cursor:pointer; font-weight:700; font-size:0.8rem; transition:0.3s;">Reject</button>
-                    <button onclick="deleteOrder('${order.firebaseKey}')" style="background:#f1f1f1; color:#999; border:none; border-radius:10px; cursor:pointer; font-weight:bold;">✕</button>
+                    <button onclick="deleteOrder('${order.firebaseKey}')" style="background:#f1f1f1; color:#999; border:none; border-radius:10px; cursor:pointer; font-weight:bold;">X</button>
                 </div>
             </div>
         </div>`;
@@ -243,4 +241,35 @@ window.markAsPaid = function(key) {
     if(confirm('Kya aapne payment receive kar li hai?')) {
         db.ref('orders/' + key).update({ paymentStatus: 'Paid' });
     }
+}
+
+window.clearOldOrders = function() {
+    const days = 30;
+    const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+    
+    if(!confirm('30 din se purane saare orders delete ho jayenge. Pakka karna hai?')) return;
+
+    db.ref('orders').once('value', (snapshot) => {
+        const data = snapshot.val();
+        if (!data) { alert('Koi orders nahi mile.'); return; }
+
+        let deleteCount = 0;
+        const promises = [];
+
+        Object.keys(data).forEach(key => {
+            if ((data[key].timestamp || 0) < cutoff) {
+                promises.push(db.ref('orders/' + key).remove());
+                deleteCount++;
+            }
+        });
+
+        if (deleteCount === 0) {
+            alert('30 din se purana koi order nahi hai.');
+            return;
+        }
+
+        Promise.all(promises).then(() => {
+            alert(deleteCount + ' purane orders delete ho gaye!');
+        });
+    });
 }
